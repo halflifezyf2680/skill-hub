@@ -64,15 +64,6 @@ install_skills(sourcePath="/path/to/skill-package")
 validate_skills()  ← 检查有没有问题
 ```
 
-### 批量导入外部 skill 并审查
-
-```
-1. 把 skill 文件放入 data/hub/staging/imports/
-2. list_import_candidates(status="review_required")
-3. read_import_candidate(id)  ← 看内容和问题
-4. write_repaired_import(id, skillMarkdown)  ← 提交修复
-```
-
 ## 4. 工具速查
 
 ### 路由（只读，随时可调）
@@ -97,17 +88,7 @@ validate_skills()  ← 检查有没有问题
 |------|-----------|------|
 | `install_skills(sourcePath)` | 从目录批量安装 skill 包 | 会覆盖同 ID 的已有 skill |
 | `create_skill(name, description, skillMarkdown)` | 在 hub 内直接创建新 skill | 自动分组 |
-| `create_group(group, groupDescription, keywords?, aliases?)` | 现有组覆盖不了的领域 | 不要轻易建新组 |
-| `update_group(group, ...)` | 改组定义（ID、描述、关键词） | 会触发所有 skill 重新分组 |
-| `delete_group(group)` | 删除空的自定义组 | 内置组不可删，非空组不可删 |
-
-### 导入审查
-
-| 工具 | 什么时候用 |
-|------|-----------|
-| `list_import_candidates(status?, limit?)` | 查看 staging/imports/ 中的待审查文件 |
-| `read_import_candidate(id)` | 看候选的原始内容和问题 |
-| `write_repaired_import(id, skillMarkdown, targetId?, notes?)` | 修复后写回 staging/repaired/ |
+| `manage_group(mode, group, ...)` | 创建/更新/删除组 | 三合一，mode 选 create/update/delete |
 
 ## 5. Skill 包格式
 

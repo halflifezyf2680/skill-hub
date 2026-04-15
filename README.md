@@ -1,10 +1,10 @@
 # Skill Hub
 
-**用 14 个工具的固定开销，按需访问 200+ 个专业技能，而不需要把任何 skill 正文常驻上下文。**
+**用 9 个工具的固定开销，按需访问 200+ 个专业技能，而不需要把任何 skill 正文常驻上下文。**
 
 传统做法：每个 skill 作为本地 skill 加载 → description 全量驻留 context → 200 个 skill = 数万 tokens 白白浪费，且每次对话都背着它们跑。
 
-Skill Hub 的做法：skill 全部存放在本地包仓库，context 里只有 14 个轻量工具定义。LLM 需要某个专业能力时，通过路由按需加载。不需要的时候，零开销。
+Skill Hub 的做法：skill 全部存放在本地包仓库，context 里只有 9 个轻量工具定义。LLM 需要某个专业能力时，通过路由按需加载。不需要的时候，零开销。
 
 ## 路由协议
 
@@ -83,7 +83,7 @@ Skill 正文内容...
 
 `name` 和 `description` 是必填的 frontmatter 字段，用于搜索索引和组分类。
 
-## 工具清单
+## 工具清单（9 个）
 
 ### 路由（只读）
 
@@ -96,23 +96,13 @@ Skill 正文内容...
 | `validate_skills` | 校验所有 skill 的完整性和重复情况 |
 | `get_hub_status` | 查看索引和文件监听状态 |
 
-### 导入审查
-
-| 工具 | 用途 |
-|------|------|
-| `list_import_candidates` | 列出待审查的导入候选 |
-| `read_import_candidate` | 查看候选详情 |
-| `write_repaired_import` | 提交修复后的候选 |
-
 ### 写操作
 
 | 工具 | 用途 |
 |------|------|
 | `install_skills` | 从目录批量安装 skill 包 |
 | `create_skill` | 创建新 skill |
-| `create_group` | 创建新组 |
-| `update_group` | 更新组定义 |
-| `delete_group` | 删除空组 |
+| `manage_group` | 创建/更新/删除组（mode: create/update/delete） |
 
 ## 组体系
 

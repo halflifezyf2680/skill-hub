@@ -4,20 +4,14 @@ import { z } from "zod/v4";
 
 import { ensureStorageLayout, loadConfig } from "./config.js";
 import { SkillRegistry } from "./registry/registry.js";
-import { createGroup } from "./tools/create-group.js";
 import { createSkill } from "./tools/create-skill.js";
-import { deleteGroup } from "./tools/delete-group.js";
 import { getHubStatus } from "./tools/get-hub-status.js";
 import { installSkills } from "./tools/install-skills.js";
 import { listGroupSkills } from "./tools/list-group-skills.js";
 import { listSkillGroups } from "./tools/list-groups.js";
 import { readSkill } from "./tools/read-skill.js";
-import { listImportSkillCandidates } from "./tools/list-staging-candidates.js";
-import { readImportCandidate } from "./tools/read-staging-candidate.js";
 import { searchSkillGroups } from "./tools/search-skills.js";
-import { updateGroup } from "./tools/update-group.js";
 import { validateSkills } from "./tools/validate-skills.js";
-import { writeRepairedImportSkill } from "./tools/write-repaired-skill.js";
 import { startSkillWatcher } from "./watcher/watch.js";
 
 async function main() {
@@ -60,10 +54,6 @@ async function main() {
       "",
       "WHEN TO USE: Tasks requiring specialized workflow, formal process, or high-density domain knowledge.",
       "WHEN NOT TO USE: Ordinary coding, simple edits, general questions — handle directly.",
-      "",
-      "TOOL CATEGORIES:",
-      "Read-only (routing & discovery): search_skills, list_skill_groups, list_group_skills, read_skill, validate_skills, list_import_candidates, read_import_candidate, get_hub_status.",
-      "Write (mutation — always do read checks first): install_skills, create_skill, create_group, update_group, delete_group, write_repaired_import.",
     ].join("\n"),
   });
 
@@ -319,42 +309,10 @@ async function main() {
   );
 
   server.registerTool(
-    "create_group",
+    "manage_group",
     {
       description:
-        "Write tool. Create a new managed group in the hub group catalog. Use only when an existing group cannot stably represent a recurring domain. New groups become available to routing after index rebuild.",
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        openWorldHint: false,
-        idempotentHint: false,
-      },
-      inputSchema: {
-        group: z.string().min(1).describe("Stable group id, usually kebab-case."),
-        groupDescription: z.string().min(1).describe("LLM-facing description for this group."),
-        keywords: z.array(z.string().min(1)).optional().describe("Optional routing keywords for the group."),
-        aliases: z.array(z.string().min(1)).optional().describe("Optional alternative names for matching and future rename continuity."),
-      },
-    },
-    async ({ group, groupDescription, keywords, aliases }) => {
-      const result = await createGroup(registry, {
-        group,
-        groupDescription,
-        keywords,
-        aliases,
-      });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        structuredContent: result,
-      };
-    },
-  );
-
-  server.registerTool(
-    "update_group",
-    {
-      description:
-        "Write tool. Rename or update a managed group. This rebuilds indexes and may reclassify many existing skills against the updated group catalog. Prefer this over changing many skills one by one when the group definition itself is wrong.",
+        "Write tool. Manage skill groups: create a new group, update an existing group (description, keywords, aliases, rename), or delete an empty custom group. Builtin groups cannot be deleted.",
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,
@@ -362,179 +320,32 @@ async function main() {
         idempotentHint: false,
       },
       inputSchema: {
-        group: z.string().min(1).describe("Current group id."),
-        newGroup: z.string().min(1).optional().describe("Optional new group id."),
-        groupDescription: z.string().min(1).optional().describe("Optional replacement group description."),
-        keywords: z.array(z.string().min(1)).optional().describe("Optional replacement routing keywords."),
-        aliases: z.array(z.string().min(1)).optional().describe("Optional replacement aliases."),
+        mode: z.enum(["create", "update", "delete"]).describe("Operation mode."),
+        group: z.string().min(1).describe("Group id (kebab-case). For update/delete, must be an existing group."),
+        groupDescription: z.string().min(1).optional().describe("Group description. Required for create, optional for update."),
+        newGroup: z.string().min(1).optional().describe("New group id for rename (update mode only)."),
+        keywords: z.array(z.string().min(1)).optional().describe("Routing keywords (replaces existing on update)."),
+        aliases: z.array(z.string().min(1)).optional().describe("Alternative names (replaces existing on update)."),
       },
     },
-    async ({ group, newGroup, groupDescription, keywords, aliases }) => {
-      const result = await updateGroup(registry, {
-        group,
-        newGroup,
-        groupDescription,
-        keywords,
-        aliases,
-      });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        structuredContent: result,
-      };
-    },
-  );
-
-  server.registerTool(
-    "delete_group",
-    {
-      description:
-        "Write tool. Delete an empty custom group from the managed group catalog. Builtin groups cannot be deleted. Only use after confirming the group has no remaining skills.",
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        openWorldHint: false,
-        idempotentHint: false,
-      },
-      inputSchema: {
-        group: z.string().min(1).describe("Group id to delete."),
-      },
-    },
-    async ({ group }) => {
-      const result = await deleteGroup(registry, { group });
-      return {
-        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-        structuredContent: result,
-      };
-    },
-  );
-
-  server.registerTool(
-    "list_import_candidates",
-    {
-      description:
-        "Read-only import governance tool. List imported skill candidates that still need conversion, review, or repair before entering the formal packages store.",
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        openWorldHint: false,
-        idempotentHint: true,
-      },
-      inputSchema: {
-        status: z
-          .enum(["ready", "review_required", "blocked", "repaired"])
-          .optional()
-          .describe("Optional status filter."),
-        limit: z.number().int().min(1).max(100).default(30),
-      },
-    },
-    async ({ status, limit }) => {
-      const candidates = await listImportSkillCandidates({
-        rawRoot: config.storage.stagingImportsRoot,
-        repairedRoot: config.storage.stagingRepairedRoot,
-        status,
-        limit,
-      });
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(
-              {
-                status: status ?? null,
-                returned: candidates.length,
-                candidates,
-              },
-              null,
-              2,
-            ),
-          },
-        ],
-        structuredContent: {
-          status: status ?? null,
-          returned: candidates.length,
-          candidates,
-        },
-      };
-    },
-  );
-
-  server.registerTool(
-    "read_import_candidate",
-    {
-      description:
-        "Read-only import review tool. Read one imported candidate, including its raw markdown, issues, and a small set of nearby skill groups for semantic review.",
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        openWorldHint: false,
-        idempotentHint: true,
-      },
-      inputSchema: {
-        id: z.string().min(1).describe("Candidate id returned by list_import_candidates."),
-      },
-    },
-    async ({ id }) => {
-      const result = await readImportCandidate({
-        rawRoot: config.storage.stagingImportsRoot,
-        repairedRoot: config.storage.stagingRepairedRoot,
-        registry,
-        id,
-      });
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        structuredContent: result,
-      };
-    },
-  );
-
-  server.registerTool(
-    "write_repaired_import",
-    {
-      description:
-        "Write tool. Write an LLM-repaired import candidate into staging/repaired without touching the original raw source or the formal packages directory. Use this only after semantic review of the candidate.",
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        openWorldHint: false,
-        idempotentHint: false,
-      },
-      inputSchema: {
-        id: z.string().min(1).describe("Candidate id returned by list_import_candidates."),
-        skillMarkdown: z.string().min(1).describe("Full repaired SKILL.md content."),
-        targetId: z
-          .string()
-          .min(1)
-          .optional()
-          .describe("Optional final skill package id. Defaults to the candidate inferred target id."),
-        notes: z
-          .string()
-          .optional()
-          .describe("Optional repair notes or rationale saved alongside the repaired skill."),
-      },
-    },
-    async ({ id, skillMarkdown, targetId, notes }) => {
-      const result = await writeRepairedImportSkill({
-        rawRoot: config.storage.stagingImportsRoot,
-        repairedRoot: config.storage.stagingRepairedRoot,
-        id,
-        skillMarkdown,
-        targetId,
-        notes,
-      });
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        structuredContent: result,
-      };
+    async ({ mode, group, groupDescription, newGroup, keywords, aliases }) => {
+      if (mode === "create") {
+        if (!groupDescription) throw new Error("groupDescription is required for create mode");
+        const { createGroup } = await import("./tools/create-group.js");
+        const result = await createGroup(registry, { group, groupDescription, keywords, aliases });
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }], structuredContent: result };
+      }
+      if (mode === "update") {
+        const { updateGroup } = await import("./tools/update-group.js");
+        const result = await updateGroup(registry, { group, newGroup, groupDescription, keywords, aliases });
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }], structuredContent: result };
+      }
+      if (mode === "delete") {
+        const { deleteGroup } = await import("./tools/delete-group.js");
+        const result = await deleteGroup(registry, { group });
+        return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }], structuredContent: result };
+      }
+      throw new Error(`unknown mode: ${mode}`);
     },
   );
 
@@ -542,7 +353,7 @@ async function main() {
     "get_hub_status",
     {
       description:
-        "Return hub counts, index freshness, watcher status, and import pipeline health.",
+        "Return hub counts, index freshness, watcher status.",
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -573,7 +384,7 @@ async function main() {
   await server.connect(transport);
 
   console.error(
-    `skill-router-mcp ready | hubRoot=${config.storage.hubRoot} | groupCatalog=${config.storage.groupCatalogPath} | packagesRoot=${config.storage.packagesRoot} | importRoot=${config.storage.stagingImportsRoot} | loadedSkills=${registry.size()} | issues=${registry.listIssues().length} | watch=${config.watchPolicy.enabled} | searchLimit=${config.indexPolicy.defaultSearchResultLimit}`,
+    `skill-router-mcp ready | hubRoot=${config.storage.hubRoot} | packagesRoot=${config.storage.packagesRoot} | loadedSkills=${registry.size()} | issues=${registry.listIssues().length} | watch=${config.watchPolicy.enabled} | searchLimit=${config.indexPolicy.defaultSearchResultLimit}`,
   );
 }
 
