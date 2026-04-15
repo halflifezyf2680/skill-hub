@@ -122,11 +122,13 @@ search_skills(query)     ← 尝试快速定位
 **输入：** 一个 query 字符串（来自用户任务）。
 
 **处理：**
-1. 将 query 转小写，按非字母数字字符拆分为 token（长度 >= 2）
+1. 将 query 转小写，按非字母数字中文字符拆分为 token（长度 >= 2）
 2. 对每个 group，检查是否有 token 命中：
-   - group 的 `groupDescription`（包含 group 名称）
+   - group ID、`groupDescription`、`keywords`、`aliases`
    - 该 group 内任何 skill 的 `skillName`
 3. 命中则返回该 group
+
+**关键词为中英双语：** 每个组的 keywords 同时包含英文和中文（如 engineering 有 "software" 和 "编程"），支持跨语言搜索。
 
 **匹配条件：** token 的 `includes` 检查。不做词根还原，不做词形变换。
 
@@ -147,7 +149,7 @@ directMatch 命中时，返回该 skill 的 description 供 LLM 快速评估。
 - `group id` 片段命中：权重 2
 - `groupDescription` 片段命中：权重 1
 
-无法匹配任何组的 skill 归入 `specialized-domain`。
+每个组的 keywords 为中英双语，确保中文 description 的 skill 也能被正确归类。无法匹配任何组的 skill 归入 `specialized-domain`。
 
 ## 5. 工具清单（14 个）
 

@@ -36,10 +36,10 @@ search_skills 是辅助过滤，不是必须入口。搜不到就去 list_skill_
 ### search_skills 搜索机制
 
 纯 token 匹配，不评分不排序。对每个 group，检查 query token 是否命中：
-- group 的 `groupDescription` 中的词
+- group ID、`groupDescription`、`keywords`、`aliases`
 - 该 group 内任何 skill 的 `skillName`
 
-命中则返回该 group（带组内所有 skill 名称列表）。语义判断由 LLM 完成，不由算法代劳。
+关键词为中英双语（如 engineering 同时有 "software"、"编程"），支持跨语言搜索。语义判断由 LLM 完成，不由算法代劳。
 
 ### directMatch
 
