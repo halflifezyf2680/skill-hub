@@ -169,3 +169,10 @@ npm install
 | `SKILL_ROUTER_MAX_KEYWORDS` | `12` | 每个 skill 自动提取的最大关键词数 |
 | `SKILL_ROUTER_MAX_RELATED_SKILLS` | `5` | read_skill 返回的最大关联 skill 数 |
 | `SKILL_ROUTER_WATCH` | `1` | 是否启用文件监听 |
+
+## 致谢
+
+Skill 内容来源于以下开源项目：
+
+- [agency-agents-zh](https://github.com/jnMetaCode/agency-agents-zh)（MIT License）— 211 个中文 AI 专家智能体
+- [awesome-design-md](https://github.com/VoltAgent/awesome-design-md)（MIT License）— 品牌设计系统 markdown 文件
