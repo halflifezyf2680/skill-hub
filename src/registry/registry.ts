@@ -172,7 +172,13 @@ export class SkillRegistry {
 
     for (const record of records) {
       const skills = this.groupSkills.get(record.group) ?? [];
-      const groupText = `${record.group} ${record.groupDescription}`.toLowerCase();
+      const groupMeta = this.managedGroups.find((g) => g.group === record.group);
+      const groupText = [
+        record.group,
+        record.groupDescription,
+        groupMeta?.keywords.join(" ") ?? "",
+        groupMeta?.aliases.join(" ") ?? "",
+      ].join(" ").toLowerCase();
 
       // Check if any query token matches group description or any skill name
       let matched = queryTokens.some((token) => groupText.includes(token));

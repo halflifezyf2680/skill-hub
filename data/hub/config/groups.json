@@ -17,12 +17,45 @@
       "developer",
       "automation",
       "infra",
-      "mobile"
+      "mobile",
+      "编程",
+      "开发",
+      "架构",
+      "工程师",
+      "代码",
+      "语言模型",
+      "提示词",
+      "协议",
+      "服务器",
+      "智能体",
+      "编排",
+      "自动化",
+      "区块链",
+      "索引",
+      "mcp",
+      "workflow",
+      "工作流",
+      "pipeline",
+      "智能合约",
+      "security",
+      "安全",
+      "审计",
+      "n8n",
+      "php",
+      "swift",
+      "终端",
+      "后台",
+      "重构",
+      "优化",
+      "集成"
     ],
     "aliases": [
       "software-engineering",
       "development",
-      "tech"
+      "tech",
+      "编程",
+      "开发",
+      "架构师"
     ],
     "source": "builtin"
   },
@@ -41,7 +74,11 @@
       "identity",
       "banner",
       "icon",
-      "styling"
+      "styling",
+      "设计师",
+      "体验",
+      "交互",
+      "设计"
     ],
     "aliases": [
       "visual-design",
@@ -61,7 +98,12 @@
       "research",
       "insight",
       "discovery",
-      "feature"
+      "feature",
+      "产品",
+      "需求",
+      "用户",
+      "路线图",
+      "功能"
     ],
     "aliases": [
       "product-management"
@@ -80,7 +122,12 @@
       "execution",
       "coordination",
       "timeline",
-      "stakeholder"
+      "stakeholder",
+      "项目",
+      "统筹",
+      "协调",
+      "资源分配",
+      "跨部门"
     ],
     "aliases": [
       "pm",
@@ -100,7 +147,20 @@
       "messaging",
       "storytelling",
       "audience",
-      "positioning"
+      "positioning",
+      "营销",
+      "广告",
+      "推广",
+      "品牌",
+      "内容营销",
+      "增长",
+      "传播",
+      "市场",
+      "图书",
+      "出版",
+      "内容",
+      "创作",
+      "故事"
     ],
     "aliases": [
       "go-to-market",
@@ -140,7 +200,13 @@
       "presales",
       "account",
       "crm",
-      "closing"
+      "closing",
+      "销售",
+      "客户",
+      "商机",
+      "管线",
+      "售前",
+      "成交"
     ],
     "aliases": [
       "business-development",
@@ -160,7 +226,15 @@
       "forecast",
       "cost",
       "revenue",
-      "expense"
+      "expense",
+      "财务",
+      "会计",
+      "定价",
+      "成本",
+      "支付",
+      "发票",
+      "账单",
+      "付款"
     ],
     "aliases": [
       "finops",
@@ -180,7 +254,17 @@
       "regulation",
       "governance",
       "contract",
-      "privacy"
+      "privacy",
+      "合规",
+      "审计",
+      "风险",
+      "监管",
+      "法规",
+      "治理",
+      "隐私",
+      "政策",
+      "风控",
+      "安全"
     ],
     "aliases": [
       "legal",
@@ -201,7 +285,13 @@
       "training",
       "onboarding",
       "candidate",
-      "organization"
+      "organization",
+      "培训",
+      "人才",
+      "招聘",
+      "组织",
+      "内训",
+      "领导力"
     ],
     "aliases": [
       "human-resources",
@@ -221,7 +311,14 @@
       "summary",
       "maintainer",
       "tracker",
-      "coordination"
+      "coordination",
+      "运营",
+      "行政",
+      "会议",
+      "报告",
+      "汇总",
+      "分发",
+      "助手"
     ],
     "aliases": [
       "ops-support",
@@ -260,7 +357,21 @@
       "psychologist",
       "geographer",
       "scholar",
-      "education"
+      "education",
+      "留学",
+      "高考",
+      "志愿",
+      "学习规划",
+      "学术",
+      "研究",
+      "教育",
+      "文化",
+      "地理",
+      "叙事",
+      "文学",
+      "人类学",
+      "社会学",
+      "民族志"
     ],
     "aliases": [
       "research",
@@ -280,7 +391,15 @@
       "validation",
       "verification",
       "benchmark",
-      "eval"
+      "eval",
+      "测试",
+      "质量",
+      "校准",
+      "复现",
+      "评估",
+      "验证",
+      "认证",
+      "就绪"
     ],
     "aliases": [
       "quality-assurance",
